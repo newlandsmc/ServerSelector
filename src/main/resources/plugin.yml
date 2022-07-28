@@ -1,0 +1,8 @@
+name: ServerSelector
+version: '${version}'
+main: com.semivanilla.serverselector.ServerSelector
+api-version: 1.19
+permissions:
+  serverselector.reload:
+    default: false
+    description: 'Allows the user to reload the plugin.'
