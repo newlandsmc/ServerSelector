@@ -2,6 +2,7 @@ package com.semivanilla.serverselector.manager;
 
 import com.semivanilla.serverselector.ServerSelector;
 import com.semivanilla.serverselector.menu.ServersMenu;
+import com.semivanilla.serverselector.object.ServerConfig;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.badbird5907.blib.command.BukkitCommand;
@@ -48,12 +49,19 @@ public class CommandManager implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player player) {
-            if (args.length > 0 && sender.hasPermission("serverselector.reload")) {
-                if (args[0].equalsIgnoreCase("reload")) {
+            if (args.length > 0) {
+                if (args[0].equalsIgnoreCase("reload") && sender.hasPermission("serverselector.reload")) {
                     ServerSelector.getInstance().reloadConfig();
                     ServerSelector.getInstance().loadConfigValues();
                     sender.sendMessage(CC.GREEN + "Config reloaded!");
                     return true;
+                } else {
+                    String server = args[0];
+                    ServerConfig serverConfig = ServerSelector.getInstance().getConfigs().stream().filter(config -> config.getServer().equalsIgnoreCase(server)).findFirst().orElse(null);
+                    if (serverConfig != null) {
+                        ServerSelector.send(player, serverConfig.getServer());
+                        return true;
+                    }
                 }
             }
             new ServersMenu().open(player);
