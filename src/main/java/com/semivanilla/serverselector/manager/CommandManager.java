@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class CommandManager implements CommandExecutor, TabCompleter {
+public class CommandManager implements CommandExecutor {
     @Getter
     private static final CommandManager instance = new CommandManager();
     private CommandMap map;
@@ -72,10 +72,5 @@ public class CommandManager implements CommandExecutor, TabCompleter {
             new ServersMenu().open(player);
         }
         return true;
-    }
-
-    @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        return new ArrayList<>();
     }
 }
