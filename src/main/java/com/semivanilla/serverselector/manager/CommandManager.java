@@ -2,25 +2,29 @@ package com.semivanilla.serverselector.manager;
 
 import com.semivanilla.serverselector.ServerSelector;
 import com.semivanilla.serverselector.menu.ServersMenu;
+import com.semivanilla.serverselector.object.CommandWrapper;
 import com.semivanilla.serverselector.object.ServerConfig;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.badbird5907.blib.command.BukkitCommand;
+import net.badbird5907.blib.command.BukkitCompleter;
 import net.badbird5907.blib.util.CC;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandMap;
-import org.bukkit.command.CommandSender;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.SimplePluginManager;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
-public class CommandManager implements CommandExecutor {
+public class CommandManager implements CommandExecutor, TabCompleter {
     @Getter
     private static final CommandManager instance = new CommandManager();
     private CommandMap map;
@@ -40,9 +44,10 @@ public class CommandManager implements CommandExecutor {
 
     @SneakyThrows
     public void registerCommand(String command) {
-        Constructor<BukkitCommand> cons = BukkitCommand.class.getDeclaredConstructor(String.class, CommandExecutor.class, Plugin.class);
-        cons.setAccessible(true);
-        org.bukkit.command.Command cmd = cons.newInstance(command, this, ServerSelector.getInstance());
+        //Constructor<BukkitCommand> cons = BukkitCommand.class.getDeclaredConstructor(String.class, CommandExecutor.class, Plugin.class);
+        //cons.setAccessible(true);
+        //org.bukkit.command.Command cmd = cons.newInstance(command, this, ServerSelector.getInstance());
+        Command cmd = new CommandWrapper(command, this, ServerSelector.getInstance());
         map.register(ServerSelector.getInstance().getName(), cmd);
     }
 
@@ -67,5 +72,10 @@ public class CommandManager implements CommandExecutor {
             new ServersMenu().open(player);
         }
         return true;
+    }
+
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        return new ArrayList<>();
     }
 }
