@@ -28,7 +28,9 @@ menu:
       material: 'PURPLE_STAINED_GLASS_PANE'
       name: '<dark_purple>Asthonia'
       proxy-server-name: 'asthonia'
+      permission: 'server.asthonia'
       lore:
         - ''
         - '<gray>Player Count: %count%'
-        - '<gray>Click to join the Asthonia server!'
+        - 'hasperm:<gray>Click to join the Asthonia server!'
+        - 'noperm:<red>You do not have permission to access this server'

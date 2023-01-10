@@ -6,7 +6,9 @@ import com.semivanilla.serverselector.ServerSelector;
 import lombok.Getter;
 import lombok.Setter;
 import net.badbird5907.blib.menu.buttons.Button;
+import net.badbird5907.blib.util.CC;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -22,7 +24,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -33,6 +34,7 @@ public class ServerConfig {
     private List<Component> lore;
     private Material material;
     private int playerCount = -1;
+    private String permission;
 
     public ServerConfig(ConfigurationSection section) {
         slot = section.getInt("slot");
@@ -45,6 +47,7 @@ public class ServerConfig {
                         .decoration(TextDecoration.ITALIC, false)
                 )
         );
+        permission = section.getString("permission");
     }
 
     public void sendCountRequest() {
@@ -63,11 +66,41 @@ public class ServerConfig {
         playerCount = -1;
     }
 
-    public List<Component> getLore() {
-        return lore.stream().map(line -> line.replaceText(TextReplacementConfig.builder()
+    public List<Component> getLore(Player player) {
+        /*
+        List<Component> list = new ArrayList<>(lore.stream().map(line -> line.replaceText(TextReplacementConfig.builder()
+                        .matchLiteral("%count%")
+                        .replacement((playerCount < 0) ? "Pinging..." : playerCount + "").build()))
+                .collect(Collectors.toList()));
+         */
+        List<Component> lore = new ArrayList<>();
+        for (Component component : lore) {
+            if (component instanceof TextComponent tc && permission != null && !permission.isEmpty()) {
+                String contents = tc.content();
+                if (contents.startsWith("hasperm:")) {
+                    if (!player.hasPermission(permission)) {
+                        continue;
+                    }
+                } else if (contents.startsWith("noperm:")) {
+                    if (player.hasPermission(permission)) {
+                        continue;
+                    }
+                }
+                lore.add(replace(component));
+            } else lore.add(replace(component));
+        }
+        return lore;
+    }
+
+    public Component replace(Component component) {
+        return component.replaceText(TextReplacementConfig.builder()
                 .matchLiteral("%count%")
-                .replacement((playerCount < 0) ? "Pinging..." : playerCount + "").build()))
-                .collect(Collectors.toList());
+                .replacement((playerCount < 0) ? "Pinging..." : playerCount + "")
+                .matchLiteral("hasperm:")
+                .replacement("")
+                .matchLiteral("noperm:")
+                .replacement("")
+                .build());
     }
 
     public Component getName() {
@@ -83,7 +116,7 @@ public class ServerConfig {
                 ItemStack item = new ItemStack(material);
                 ItemMeta meta = item.getItemMeta();
                 meta.displayName(getName());
-                meta.lore(getLore());
+                meta.lore(getLore(player));
                 item.setItemMeta(meta);
                 return item;
             }
@@ -95,6 +128,10 @@ public class ServerConfig {
 
             @Override
             public void onClick(Player player, int slot, ClickType clickType, InventoryClickEvent event) {
+                if (permission != null && !permission.isEmpty() && !player.hasPermission(permission)) {
+                    player.sendMessage(CC.RED + "You do not have permission to access this server.");
+                    return;
+                }
                 player.closeInventory();
                 ServerSelector.send(player, server);
             }
