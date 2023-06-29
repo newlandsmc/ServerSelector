@@ -69,12 +69,12 @@ public class ServerConfig {
     public List<Component> getLore(Player player) {
         /*
         List<Component> list = new ArrayList<>(lore.stream().map(line -> line.replaceText(TextReplacementConfig.builder()
-                        .matchLiteral("%count%")
+                        .match("%count%")
                         .replacement((playerCount < 0) ? "Pinging..." : playerCount + "").build()))
                 .collect(Collectors.toList()));
          */
         List<Component> lore = new ArrayList<>();
-        for (Component component : lore) {
+        for (Component component : this.lore) {
             if (component instanceof TextComponent tc && permission != null && !permission.isEmpty()) {
                 String contents = tc.content();
                 if (contents.startsWith("hasperm:")) {
@@ -94,13 +94,17 @@ public class ServerConfig {
 
     public Component replace(Component component) {
         return component.replaceText(TextReplacementConfig.builder()
-                .matchLiteral("%count%")
-                .replacement((playerCount < 0) ? "Pinging..." : playerCount + "")
-                .matchLiteral("hasperm:")
-                .replacement("")
-                .matchLiteral("noperm:")
-                .replacement("")
-                .build());
+                        .matchLiteral("%count%")
+                        .replacement((playerCount < 0) ? "Pinging..." : playerCount + "")
+                        .build())
+                .replaceText(TextReplacementConfig.builder()
+                        .matchLiteral("hasperm:")
+                        .replacement("")
+                        .build())
+                .replaceText(TextReplacementConfig.builder()
+                        .matchLiteral("noperm:")
+                        .replacement("")
+                        .build());
     }
 
     public Component getName() {
@@ -116,7 +120,8 @@ public class ServerConfig {
                 ItemStack item = new ItemStack(material);
                 ItemMeta meta = item.getItemMeta();
                 meta.displayName(getName());
-                meta.lore(getLore(player));
+                List<Component> l = getLore(player);
+                meta.lore(l);
                 item.setItemMeta(meta);
                 return item;
             }

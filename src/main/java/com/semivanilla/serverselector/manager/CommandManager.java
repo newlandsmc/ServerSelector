@@ -64,6 +64,10 @@ public class CommandManager implements CommandExecutor {
                     String server = args[0];
                     ServerConfig serverConfig = ServerSelector.getInstance().getConfigs().stream().filter(config -> config.getServer().equalsIgnoreCase(server)).findFirst().orElse(null);
                     if (serverConfig != null) {
+                        if (serverConfig.getPermission() != null && !serverConfig.getPermission().isEmpty() && !player.hasPermission(serverConfig.getPermission())) {
+                            player.sendMessage(CC.RED + "You do not have permission to join this server!");
+                            return true;
+                        }
                         ServerSelector.send(player, serverConfig.getServer());
                         return true;
                     }
